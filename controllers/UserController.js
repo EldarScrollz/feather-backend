@@ -6,11 +6,10 @@ import UserModel from "../models/UserModel.js";
 import PostModel from "../models/PostModel.js";
 import CommentModel from "../models/CommentModel.js";
 import HeartModel from "../models/HeartModel.js";
+import { toMilliseconds } from "../Utils/toMilliseconds.js";
 
-export const register = async (req, res) =>
-{
-    try
-    {
+export const register = async (req, res) => {
+    try {
         // Throw error if email exists
         const isUserEmailAlreadyInDB = await UserModel.findOne({ email: req.body.email });
         if (isUserEmailAlreadyInDB) { return res.status(400).json({ errorMessage: "The email already exists" }); }
@@ -28,21 +27,27 @@ export const register = async (req, res) =>
             email: req.body.email,
             passwordHash: hashedPassword,
             name: req.body.name,
+            jwtRefreshToken: "",
             userAvatar: req.body.userAvatar,
         });
-        await newUser.save();
 
         // Create JWT
-        const jsonWebToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30d" });
+        const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
+        res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true });
+        // Create refresh token
+        const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
+        res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true });
+
+        newUser.jwtRefreshToken = refreshToken;
+        await newUser.save();
 
         // Copy everything except passwordHash from newUser document (no need to include passwordHash in the response)
-        const { passwordHash, ...userData } = newUser._doc;
+        const { passwordHash, jwtRefreshToken, ...userData } = newUser._doc;
 
         // Return the document and JWT as one object
-        res.status(201).json({ ...userData, jsonWebToken });
+        res.status(201).json({ ...userData, accessToken });
     }
-    catch (error)
-    {
+    catch (error) {
         console.warn(error);
         res.status(500).json({ errorMessage: "Could not register" });
     }
@@ -50,10 +55,8 @@ export const register = async (req, res) =>
 
 
 
-export const login = async (req, res) =>
-{
-    try
-    {
+export const login = async (req, res) => {
+    try {
         // Find the user in the "users" collection by email and save him in "foundUser"
         const foundUser = await UserModel.findOne({ email: req.body.email });
         if (!foundUser) { return res.status(400).json({ errorMessage: "Incorrect username or password" }); }
@@ -62,17 +65,23 @@ export const login = async (req, res) =>
         const isPasswordValid = await bcrypt.compare(req.body.password, foundUser.passwordHash);
         if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect username or password" }); }
 
-        // Create JWT
-        const jsonWebToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30d" });
+        // Create access token
+        const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
+        res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true });
+        // Create refresh token
+        const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
+        res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true });
+
+        foundUser.jwtRefreshToken = refreshToken;
+        foundUser.save();
 
         // Copy everything except passwordHash from foundUser document (no need to include passwordHash in the response)
         const { passwordHash, ...userData } = foundUser._doc;
 
         // Return the document and JWT
-        res.status(201).json({ ...userData, jsonWebToken });
+        res.status(201).json({ ...userData/*, accessToken*/ });
     }
-    catch (error)
-    {
+    catch (error) {
         console.warn(error);
         res.status(500).json({ errorMessage: "Could not sign in" });
     }
@@ -80,10 +89,8 @@ export const login = async (req, res) =>
 
 
 
-export const getUserInfo = async (req, res) =>
-{
-    try
-    {
+export const getUserInfo = async (req, res) => {
+    try {
         const foundUser = await UserModel.findById(req.userId);
         if (!foundUser) { return res.status(404).json({ errorMessage: "User not found" }); }
 
@@ -93,8 +100,7 @@ export const getUserInfo = async (req, res) =>
         // Return the document
         res.json({ ...userData });
     }
-    catch (error)
-    {
+    catch (error) {
         console.warn(error);
         res.status(500).json({ errorMessage: "Could not get the information about the user" });
     }
@@ -102,19 +108,13 @@ export const getUserInfo = async (req, res) =>
 
 
 
-export const editUserInfo = async (req, res) =>
-{
-    try
-    {
+export const editUserInfo = async (req, res) => {
+    try {
         // Utility --------------------------------------------------------------------------------------
-        const deleteOldAvatar = () =>
-        {
-            if (foundUser.userAvatar !== process.env.NO_IMG && req.query.oldAvatar)
-            {
-                fs.unlink(`./${foundUser.userAvatar}`, (error => 
-                {
-                    if (error)
-                    {
+        const deleteOldAvatar = () => {
+            if (foundUser.userAvatar !== process.env.NO_IMG && req.query.oldAvatar) {
+                fs.unlink(`./${foundUser.userAvatar}`, (error => {
+                    if (error) {
                         console.warn("Could not delete user's avatar", error);
                         return res.status(500).json({ errorMessage: "Could not delete user's avatar" });
                     }
@@ -128,8 +128,7 @@ export const editUserInfo = async (req, res) =>
         const foundUser = await UserModel.findById(req.userId);
 
         // No password change -------------------------
-        if (!req.body.isChangePassword)
-        {
+        if (!req.body.isChangePassword) {
             await UserModel.updateOne(
                 { _id: req.userId },
                 {
@@ -171,8 +170,7 @@ export const editUserInfo = async (req, res) =>
         res.json({ message: "User's data has been updated" });
         //----------------------------------------------------------------------------------------------------------------------------------------
     }
-    catch (error)
-    {
+    catch (error) {
         console.warn(error);
         res.status(500).json({ errorMessage: "Could not edit user's data" });
     }
@@ -180,10 +178,8 @@ export const editUserInfo = async (req, res) =>
 
 
 
-export const deleteUser = async (req, res) =>
-{
-    try
-    {
+export const deleteUser = async (req, res) => {
+    try {
         const foundUser = await UserModel.findOne({ _id: req.params.userId });
         if (!foundUser) { return res.status(404).json({ errorMessage: "Could not find the user" }); }
 
@@ -202,12 +198,9 @@ export const deleteUser = async (req, res) =>
         const deletedUserHearts = await HeartModel.deleteMany({ user: req.params.userId });
         if (!deletedUserHearts) { return res.status(500).json({ errorMessage: "Could not delete user's hearts" }); }
 
-        if (foundUser.userAvatar !== process.env.NO_IMG)
-        {
-            fs.unlink(`./${foundUser.userAvatar}`, (error => 
-            {
-                if (error)
-                {
+        if (foundUser.userAvatar !== process.env.NO_IMG) {
+            fs.unlink(`./${foundUser.userAvatar}`, (error => {
+                if (error) {
                     console.warn("Could not delete user's avatar", error);
                     return res.status(500).json({ errorMessage: "Could not delete user's avatar" });
                 }
@@ -216,8 +209,7 @@ export const deleteUser = async (req, res) =>
 
         res.json({ message: "User has been completely deleted" });
     }
-    catch (error)
-    {
+    catch (error) {
         console.warn(error);
         res.status(500).json({ errorMessage: "Could not delete the user" });
     }

@@ -5,7 +5,8 @@ const UserSchema = new mongoose.Schema( // Create schema -> fill it with propert
         email: { type: String, required: true, unique: true, },
         passwordHash: { type: String, required: true },
         name: { type: String, required: true, unique: true, },
-        userAvatar: {type: String, default: process.env.NO_IMG}, // Optional
+        jwtRefreshToken: { type: String, required: true },
+        userAvatar: { type: String, default: process.env.NO_IMG }, // Optional
     },
     {
         timestamps: true, // Scheme should automatically create timestamps
@@ -14,4 +15,4 @@ const UserSchema = new mongoose.Schema( // Create schema -> fill it with propert
 export default mongoose.model("users", UserSchema);
 // Now we create a model called "users" that is based on our schema
 // we use export "default mongoose.model("users", UserSchema)" because:
-    //  "You can have one default export per file. You can give this any name you like".
+//  "You can have one default export per file. You can give this any name you like".

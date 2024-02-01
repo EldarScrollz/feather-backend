@@ -1,7 +1,7 @@
 import multer from "multer";
 import express from "express";
 
-export const configuredMulter = (app) =>
+export const multerInit = (app) =>
 {
     const storage = multer.diskStorage( // Var name must be "storage"
     {

@@ -1,25 +1,48 @@
 import jwt from "jsonwebtoken";
+import UserModel from "../models/UserModel.js";
+import { toMilliseconds } from "./toMilliseconds.js";
 
-export default (req, res, next) =>
-{
-    const jsonWebToken = (req.headers.authorization || "").replace(/Bearer\s?/, "");
+export default async (req, res, next) => {
+    // const accessToken = (req.headers.authorization || "").replace(/Bearer\s?/, "");
+    const { accessToken } = req.cookies;
 
-    if (jsonWebToken)
-    {
-        try
-        {
-            const decodedToken = jwt.verify(jsonWebToken, process.env.ACCESS_TOKEN_SECRET);
-            req.userId = decodedToken._id;
+    if (accessToken) {
+        try {
+            const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+            req.userId = decodedAccessToken._id;
 
             next();
         }
-        catch (error) 
-        {
-            return res.status(403).json({ errorMessage: "Access denied, wrong jsonWebToken" });
+        catch (error) {
+            return res.status(403).json({ errorMessage: "Invalid access token" });
         }
     }
-    else
-    {
-        return res.status(401).json({ errorMessage: "User must be signed in" });
+    else {
+        try {
+            const { refreshToken: cookieRefreshToken } = req.cookies;
+
+            jwt.verify(cookieRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+            const foundUser = await UserModel.findOne({ jwtRefreshToken: cookieRefreshToken });
+
+            // Access token.
+            const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
+            res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true });
+            req.userId = foundUser._id;
+
+            // Refresh token.
+            const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
+            res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true });
+
+            foundUser.jwtRefreshToken = refreshToken;
+            await foundUser.save();
+
+            next();
+        } catch (error) {
+            console.error(error);
+            return res.status(403).json({ errorMessage: "Invalid refresh token" });
+        }
+
+        // return res.status(401).json({ errorMessage: "User must be signed in" });
     }
 };
