@@ -3,7 +3,6 @@ import UserModel from "../models/UserModel.js";
 import { toMilliseconds } from "./toMilliseconds.js";
 
 export default async (req, res, next) => {
-    // const accessToken = (req.headers.authorization || "").replace(/Bearer\s?/, "");
     const { accessToken } = req.cookies;
 
     if (accessToken) {
@@ -20,6 +19,7 @@ export default async (req, res, next) => {
     else {
         try {
             const { refreshToken: cookieRefreshToken } = req.cookies;
+            if (!cookieRefreshToken) { return res.status(403).json({ errorMessage: "Refresh token is empty" }); }
 
             jwt.verify(cookieRefreshToken, process.env.REFRESH_TOKEN_SECRET);
 
@@ -42,7 +42,5 @@ export default async (req, res, next) => {
             console.error(error);
             return res.status(403).json({ errorMessage: "Invalid refresh token" });
         }
-
-        // return res.status(401).json({ errorMessage: "User must be signed in" });
     }
 };

@@ -48,7 +48,7 @@ export const register = async (req, res) => {
         res.status(201).json({ ...userData, accessToken });
     }
     catch (error) {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not register" });
     }
 };
@@ -76,14 +76,28 @@ export const login = async (req, res) => {
         foundUser.save();
 
         // Copy everything except passwordHash from foundUser document (no need to include passwordHash in the response)
-        const { passwordHash, ...userData } = foundUser._doc;
+        const { passwordHash, jwtRefreshToken, ...userData } = foundUser._doc;
 
         // Return the document and JWT
         res.status(201).json({ ...userData/*, accessToken*/ });
     }
     catch (error) {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not sign in" });
+    }
+};
+
+
+
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+
+        res.json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ errorMessage: "Could not logout" });
     }
 };
 
@@ -101,7 +115,7 @@ export const getUserInfo = async (req, res) => {
         res.json({ ...userData });
     }
     catch (error) {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get the information about the user" });
     }
 };
@@ -115,7 +129,7 @@ export const editUserInfo = async (req, res) => {
             if (foundUser.userAvatar !== process.env.NO_IMG && req.query.oldAvatar) {
                 fs.unlink(`./${foundUser.userAvatar}`, (error => {
                     if (error) {
-                        console.warn("Could not delete user's avatar", error);
+                        console.error("Could not delete user's avatar", error);
                         return res.status(500).json({ errorMessage: "Could not delete user's avatar" });
                     }
                 }));
@@ -171,7 +185,7 @@ export const editUserInfo = async (req, res) => {
         //----------------------------------------------------------------------------------------------------------------------------------------
     }
     catch (error) {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not edit user's data" });
     }
 };
@@ -201,16 +215,19 @@ export const deleteUser = async (req, res) => {
         if (foundUser.userAvatar !== process.env.NO_IMG) {
             fs.unlink(`./${foundUser.userAvatar}`, (error => {
                 if (error) {
-                    console.warn("Could not delete user's avatar", error);
+                    console.error("Could not delete user's avatar", error);
                     return res.status(500).json({ errorMessage: "Could not delete user's avatar" });
                 }
             }));
         }
+        
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
 
         res.json({ message: "User has been completely deleted" });
     }
     catch (error) {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not delete the user" });
     }
 };

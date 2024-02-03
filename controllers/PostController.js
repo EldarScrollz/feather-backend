@@ -22,7 +22,7 @@ export const createPost = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not create the new post" });
     }
 };
@@ -46,7 +46,7 @@ export const getAllPosts = async (req, res) =>
     }
     catch (error) 
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get all posts" });
     }
 };
@@ -70,7 +70,7 @@ export const getPostById = async (req, res) =>
     }
     catch (error) 
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get all posts" });
     }
 };
@@ -93,7 +93,7 @@ export const deletePost = async (req, res) =>
             {
                 if (error)
                 {
-                    console.warn("Could not delete posts's image", error);
+                    console.error("Could not delete posts's image", error);
                     return res.status(500).json({ errorMessage: "Could not delete posts's image" });
                 }
             }));
@@ -107,7 +107,7 @@ export const deletePost = async (req, res) =>
     }
     catch (error) 
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not delete the post" });
     }
 };
@@ -138,7 +138,7 @@ export const updatePost = async (req, res) =>
             {
                 if (error)
                 {
-                    console.warn("Could not delete old posts's image", error);
+                    console.error("Could not delete old posts's image", error);
                     return res.status(500).json({ errorMessage: "Could not delete old posts's image" });
                 }
             }));
@@ -149,7 +149,7 @@ export const updatePost = async (req, res) =>
     }
     catch (error) 
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not update the post" });
     }
 };
@@ -167,7 +167,7 @@ export const getTopTags = async (req, res) =>
     }
     catch (error) 
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get top tags" });
     }
 };

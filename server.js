@@ -5,6 +5,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
 
 import { postRouter } from "./routes/PostRouter.js";
 import { userRouter } from "./routes/UserRouter.js";
@@ -19,16 +20,21 @@ const app = express();
 app.use(express.json());
 // Use cookie parser to send/receive cookies.
 app.use(cookieParser());
-// Cors.
 app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL }));
+app.use(helmet({ crossOriginResourcePolicy: false, }),);
 
-// Connect to MongoDB.
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log("DATABASE CONNECTED 🗸"))
-    .catch((error) => { console.warn("Database Error:", error); });
 
-// Listen to the given port.
-app.listen(process.env.PORT, (error) => { if (error) { return console.warn("Server Error:", error); } console.log("SERVER STARTED 🗸"); });
+(async () => {
+    try {
+        // Connect to MongoDB.
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log("DATABASE CONNECTED 🗸");
+
+        // Listen to the given port.
+        app.listen(process.env.PORT);
+        console.log("SERVER STARTED 🗸");
+    } catch (error) { console.error("Database or Server error:", error); }
+})();
 
 
 //===========================================================================

@@ -10,7 +10,7 @@ export const getAllComments = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get all comments" });
     }
 
@@ -30,7 +30,7 @@ export const getCommentsByPostId = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get comments by post id" });
     }
 };
@@ -48,7 +48,7 @@ export const getReplies = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get comment's replies" });
     }
 };
@@ -82,7 +82,7 @@ export const createComment = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not create the comment" });
     }
 };
@@ -101,7 +101,7 @@ export const updateComment = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not update the comment" });
     }
 };
@@ -146,7 +146,7 @@ export const deleteComment = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not delete the comment" });
     }
 };

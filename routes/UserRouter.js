@@ -13,6 +13,7 @@ router.get("/me", checkAuth, UserController.getUserInfo); // Get info about the 
 
 router.post("/register", registerValidation, handleValidationsErrors, UserController.register);
 router.post("/login", loginValidation, handleValidationsErrors, UserController.login);
+router.post("/logout", UserController.logout)
 
 router.patch("/editProfile", checkAuth, UserController.editUserInfo);
 

@@ -10,7 +10,7 @@ export const getAllHearts = async (req, res) =>
     }
     catch (error) 
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get all hearts" });
     }
 };
@@ -26,7 +26,7 @@ export const getHeartByPostId = async (req, res) =>
     }
     catch (error) 
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not get all posts" });
     }
 };
@@ -42,7 +42,7 @@ export const hasUserHeartedPost = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not check if user has already hearted the post" });
     }
 };
@@ -76,7 +76,7 @@ export const createHeart = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not create the heart" });
     }
 };
@@ -97,7 +97,7 @@ export const deleteByHeartIdAndPostId = async (req, res) =>
     }
     catch (error)
     {
-        console.warn(error);
+        console.error(error);
         res.status(500).json({ errorMessage: "Could not delete the heart" });
     }
 };
