@@ -24,6 +24,7 @@ export default async (req, res, next) => {
             jwt.verify(cookieRefreshToken, process.env.REFRESH_TOKEN_SECRET);
 
             const foundUser = await UserModel.findOne({ jwtRefreshToken: cookieRefreshToken });
+            if (!foundUser) { return res.status(404).json({ errorMessage: "Could not find the user based on a refresh token" }); }
 
             // Access token.
             const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
