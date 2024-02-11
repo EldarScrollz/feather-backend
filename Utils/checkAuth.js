@@ -28,12 +28,14 @@ export default async (req, res, next) => {
 
             // Access token.
             const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-            res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true });
+            //! (secure: true, sameSite: 'None') shouldn't be included in the real project.
+            res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'None' });
             req.userId = foundUser._id;
 
             // Refresh token.
             const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-            res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true });
+            //! (secure: true, sameSite: 'None') shouldn't be included in the real project.
+            res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'None' });
 
             foundUser.jwtRefreshToken = refreshToken;
             await foundUser.save();
