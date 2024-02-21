@@ -33,7 +33,7 @@ export const getAllPosts = async (req, res) =>
 {
     try
     {
-        const allPosts = await PostModel.find().populate("user").exec();
+        const allPosts = await PostModel.find({}).sort({createdAt: -1}).populate("user").exec();
 
         // Remove "passwordHash" from JSON
         allPosts.forEach((e) => 
