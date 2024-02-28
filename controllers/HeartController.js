@@ -1,15 +1,12 @@
 import HeartModel from "../models/HeartModel.js";
 import PostModel from "../models/PostModel.js";
 
-export const getAllHearts = async (req, res) =>
-{
-    try
-    {
+export const getAllHearts = async (req, res) => {
+    try {
         const allHearts = await HeartModel.find();
         res.json(allHearts);
     }
-    catch (error) 
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not get all hearts" });
     }
@@ -17,15 +14,12 @@ export const getAllHearts = async (req, res) =>
 
 
 
-export const getHeartByPostId = async (req, res) =>
-{
-    try
-    {
+export const getHeartByPostId = async (req, res) => {
+    try {
         const foundHearts = await HeartModel.find({ postId: req.params.postId });
         res.json(foundHearts);
     }
-    catch (error) 
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not get all posts" });
     }
@@ -33,15 +27,12 @@ export const getHeartByPostId = async (req, res) =>
 
 
 
-export const hasUserHeartedPost = async (req, res) =>
-{
-    try
-    {
+export const hasUserHeartedPost = async (req, res) => {
+    try {
         const foundHeart = await HeartModel.findOne({ postId: req.params.postId, user: req.params.userId });
         res.json(foundHeart);
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not check if user has already hearted the post" });
     }
@@ -49,10 +40,8 @@ export const hasUserHeartedPost = async (req, res) =>
 
 
 
-export const createHeart = async (req, res) =>
-{
-    try
-    {
+export const createHeart = async (req, res) => {
+    try {
         //Check if post exists
         const postCheck = await PostModel.findById({ _id: req.params.postId });
         if (!postCheck) return res.status(404).json({ errorMessage: "Post not found" });
@@ -74,8 +63,7 @@ export const createHeart = async (req, res) =>
 
         res.status(201).json(newHeart);
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not create the heart" });
     }
@@ -83,20 +71,17 @@ export const createHeart = async (req, res) =>
 
 
 
-export const deleteByHeartIdAndPostId = async (req, res) =>
-{
-    try
-    {
-        const foundItem = await HeartModel.findOneAndDelete({ postId: req.query.postId, user: req.query.userId });
+export const deleteByHeartIdAndPostId = async (req, res) => {
+    try {
+        const foundItem = await HeartModel.findOneAndDelete({ postId: req.params.postId, user: req.params.userId });
         if (!foundItem) return res.status(404).json({ errorMessage: "Could not delete the heart, heart was not found" });
 
         //Decrease heartsCount on the post
-        await PostModel.findOneAndUpdate({ _id: req.query.postId }, { $inc: { heartsCount: -1 } });
+        await PostModel.findOneAndUpdate({ _id: req.params.postId }, { $inc: { heartsCount: -1 } });
 
         res.json({ message: "Heart has been removed" });
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not delete the heart" });
     }

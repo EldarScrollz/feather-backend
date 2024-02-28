@@ -1,10 +1,10 @@
-import express from 'express'
+import express from 'express';
 import checkAuth from '../Utils/checkAuth.js';
 import { postValidation } from '../validations.js';
 import handleValidationsErrors from '../Utils/handleValidationsErrors.js';
 import * as PostController from "../controllers/PostController.js";
 
-const router = express.Router()
+const router = express.Router();
 
 //=================================
 // /posts
@@ -23,9 +23,9 @@ router.get("/:id", PostController.getPostById);
 // Authorized users only (checkAuth):
 router.post("/", checkAuth, postValidation, handleValidationsErrors, PostController.createPost);
 
-router.delete("/:id", checkAuth, PostController.deletePost);
-
 router.patch("/:id", checkAuth, postValidation, handleValidationsErrors, PostController.updatePost);
+
+router.delete("/:id", checkAuth, PostController.deletePost);
 // -----------------------------------------------------------------------------
 
-export {router as postRouter}
+export { router as postRouter };

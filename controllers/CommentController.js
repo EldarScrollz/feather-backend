@@ -1,15 +1,12 @@
 import CommentModel from "../models/CommentModel.js";
 import PostModel from "../models/PostModel.js";
 
-export const getAllComments = async (req, res) =>
-{
-    try
-    {
+export const getAllComments = async (req, res) => {
+    try {
         const allComments = await CommentModel.find().populate("user").exec();
         res.json(allComments);
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not get all comments" });
     }
@@ -18,18 +15,15 @@ export const getAllComments = async (req, res) =>
 
 
 
-export const getCommentsByPostId = async (req, res) =>
-{
-    try
-    {
+export const getCommentsByPostId = async (req, res) => {
+    try {
         const postId = req.params.id;
 
         const postComments = await CommentModel.find({ postId: postId }).populate("user").exec();
         postComments.forEach((e) => { e.user.passwordHash = undefined; });
         res.json(postComments);
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not get comments by post id" });
     }
@@ -37,17 +31,14 @@ export const getCommentsByPostId = async (req, res) =>
 
 
 
-export const getReplies = async (req, res) =>
-{
-    try
-    {
+export const getReplies = async (req, res) => {
+    try {
         const parentCommentId = req.params.id;
         const commentReplies = await CommentModel.find({ commentParentId: parentCommentId }).populate("user").exec();
 
         res.json(commentReplies);
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not get comment's replies" });
     }
@@ -55,10 +46,8 @@ export const getReplies = async (req, res) =>
 
 
 
-export const createComment = async (req, res) =>
-{
-    try
-    {
+export const createComment = async (req, res) => {
+    try {
         const postOfComment = await PostModel.findOneAndUpdate(
             { _id: req.body.postId },
             { $inc: { commentsCount: 1 } }
@@ -80,8 +69,7 @@ export const createComment = async (req, res) =>
 
         res.status(201).json(newComment);
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not create the comment" });
     }
@@ -89,18 +77,15 @@ export const createComment = async (req, res) =>
 
 
 
-export const updateComment = async (req, res) =>
-{
-    try
-    {
+export const updateComment = async (req, res) => {
+    try {
         const commentId = req.params.id;
 
         await CommentModel.findOneAndUpdate({ _id: commentId }, { text: req.body.text, isEdited: true });
 
         res.json({ message: "Comment has been updated" });
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not update the comment" });
     }
@@ -108,13 +93,10 @@ export const updateComment = async (req, res) =>
 
 
 
-export const deleteComment = async (req, res) =>
-{
-    try
-    {
+export const deleteComment = async (req, res) => {
+    try {
         // Utility --------------------------------------------------------------------------------------------------------
-        const decreaseCommentsCount = async () =>
-        {
+        const decreaseCommentsCount = async () => {
             const updatedPost = await PostModel.findOneAndUpdate({ _id: req.body.postId }, { $inc: { commentsCount: -1 } });
             if (!updatedPost) { return res.status(404).json({ errorMessage: "Post not found" }); }
         };
@@ -123,8 +105,7 @@ export const deleteComment = async (req, res) =>
         const commentId = req.params.id;
 
         // If it is a main comment (delete all replies with it)
-        if (req.body.commentParentId === null)
-        {
+        if (req.body.commentParentId === null) {
             const removedComment = await CommentModel.findByIdAndDelete({ _id: commentId });
             if (!removedComment) { return res.status(404).json({ errorMessage: "Comment not found" }); }
 
@@ -144,8 +125,7 @@ export const deleteComment = async (req, res) =>
             res.json({ message: "Comment has been removed" });
         }
     }
-    catch (error)
-    {
+    catch (error) {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not delete the comment" });
     }

@@ -13,6 +13,6 @@ router.get("/:postId", HeartController.getHeartByPostId);
 
 router.post("/:postId", checkAuth, HeartController.createHeart);
 
-router.delete("/", checkAuth, HeartController.deleteByHeartIdAndPostId);
+router.delete("/:postId/:userId", checkAuth, HeartController.deleteByHeartIdAndPostId);
 
 export { router as heartRouter };
