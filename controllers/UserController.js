@@ -147,18 +147,19 @@ export const editUserInfo = async (req, res) => {
 
         // No password change -------------------------
         if (!req.body.isChangePassword) {
-            await UserModel.updateOne(
+            const editedUser = await UserModel.findOneAndUpdate(
                 { _id: req.userId },
                 {
                     email: req.body.email,
                     name: req.body.name,
                     userAvatar: req.body.userAvatar,
-                }
+                },
+                { new: true }
             );
 
             deleteOldAvatar();
 
-            return res.json({ message: "User's data has been updated" });
+            return res.json(editedUser);
         }
         //---------------------------------------------
 
@@ -173,19 +174,20 @@ export const editUserInfo = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
-        await UserModel.updateOne(
+        const editedUser = await UserModel.findOneAndUpdate(
             { _id: req.userId },
             {
                 email: req.body.email,
                 name: req.body.name,
                 userAvatar: req.body.userAvatar,
                 passwordHash: hashedPassword,
-            }
+            },
+            { new: true }
         );
 
         deleteOldAvatar();
 
-        res.json({ message: "User's data has been updated" });
+        res.json(editedUser);
         //----------------------------------------------------------------------------------------------------------------------------------------
     }
     catch (error) {
