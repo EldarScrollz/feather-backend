@@ -28,7 +28,31 @@ export const createPost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
     try {
-        const allPosts = await PostModel.find({}).sort({ createdAt: -1 }).populate("user").exec();
+        let allPosts = [];
+
+        switch (req.query.sortBy) {
+            case "new posts":
+                allPosts = await PostModel.find({}).sort({ createdAt: -1 }).populate("user").exec();
+                break;
+            case "old posts":
+                allPosts = await PostModel.find({}).sort({ createdAt: 1 }).populate("user").exec();
+                break;
+            case "ascending hearts":
+                allPosts = await PostModel.find({}).sort({ heartsCount: 1 }).populate("user").exec();
+                break;
+            case "descending hearts":
+                allPosts = await PostModel.find({}).sort({ heartsCount: -1 }).populate("user").exec();
+                break;
+            case "ascending views":
+                allPosts = await PostModel.find({}).sort({ viewsCount: 1 }).populate("user").exec();
+                break;
+            case "descending views":
+                allPosts = await PostModel.find({}).sort({ viewsCount: -1 }).populate("user").exec();
+                break;
+            default:
+                allPosts = await PostModel.find({}).sort({ createdAt: -1 }).populate("user").exec();
+                break;
+        }
 
         // Remove "passwordHash" from JSON
         allPosts.forEach((e) => {
