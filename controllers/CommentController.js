@@ -96,9 +96,20 @@ export const updateComment = async (req, res) => {
 export const deleteComment = async (req, res) => {
     try {
         // Utility --------------------------------------------------------------------------------------------------------
-        const decreaseCommentsCount = async () => {
-            const updatedPost = await PostModel.findOneAndUpdate({ _id: req.body.postId }, { $inc: { commentsCount: -1 } });
-            if (!updatedPost) { return res.status(404).json({ errorMessage: "Post not found" }); }
+        const decreaseCommentsCount = async (deletedCount) => {
+            try {
+                const updatedPost = await PostModel.findById({ _id: req.body.postId });
+                if (!updatedPost) { return res.status(404).json({ errorMessage: "Post not found" }); }
+
+                console.log("deletedCount", deletedCount);
+                if (deletedCount) { updatedPost.commentsCount = updatedPost.commentsCount - deletedCount; }
+                else { updatedPost.commentsCount = updatedPost.commentsCount--; }
+
+                await updatedPost.save();
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ errorMessage: "Could not delete the comment (could not decrease the 'commentsCount')" });
+            }
         };
         // ----------------------------------------------------------------------------------------------------------------
 
@@ -109,8 +120,9 @@ export const deleteComment = async (req, res) => {
             const removedComment = await CommentModel.findByIdAndDelete({ _id: commentId });
             if (!removedComment) { return res.status(404).json({ errorMessage: "Comment not found" }); }
 
-            await CommentModel.deleteMany({ commentParentId: req.body._id });
-            decreaseCommentsCount();
+            const { deletedCount } = await CommentModel.deleteMany({ commentParentId: req.body._id });
+            // '+1' because we want to account for the main comment.
+            await decreaseCommentsCount((deletedCount + 1));
 
             res.json({ message: "Comment (and associated replies (if present)) have been removed" });
         }
@@ -118,7 +130,7 @@ export const deleteComment = async (req, res) => {
         {
             const removedComment = await CommentModel.findByIdAndDelete({ _id: commentId });
             if (!removedComment) { return res.status(404).json({ errorMessage: "Comment not found" }); }
-            decreaseCommentsCount();
+            await decreaseCommentsCount();
             // Decrease repliesCount when deleting main comment's reply
             await CommentModel.findOneAndUpdate({ _id: req.body.commentParentId }, { $inc: { repliesCount: -1 } });
 
