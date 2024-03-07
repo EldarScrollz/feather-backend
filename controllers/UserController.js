@@ -218,7 +218,7 @@ export const deleteUser = async (req, res) => {
         const deletedUserHearts = await HeartModel.deleteMany({ user: req.params.userId });
         if (!deletedUserHearts) { return res.status(500).json({ errorMessage: "Could not delete user's hearts" }); }
 
-        if (foundUser.userAvatar !== process.env.NO_IMG) {
+        if (foundUser.userAvatar && foundUser.userAvatar !== process.env.NO_IMG) {
             fs.unlink(`./${foundUser.userAvatar}`, (error => {
                 if (error) {
                     console.error("Could not delete user's avatar", error);
