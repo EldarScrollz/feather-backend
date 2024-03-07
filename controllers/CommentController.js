@@ -101,7 +101,6 @@ export const deleteComment = async (req, res) => {
                 const updatedPost = await PostModel.findById({ _id: req.body.postId });
                 if (!updatedPost) { return res.status(404).json({ errorMessage: "Post not found" }); }
 
-                console.log("deletedCount", deletedCount);
                 if (deletedCount) { updatedPost.commentsCount = updatedPost.commentsCount - deletedCount; }
                 else { updatedPost.commentsCount = updatedPost.commentsCount--; }
 
