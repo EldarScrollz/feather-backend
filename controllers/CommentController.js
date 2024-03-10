@@ -104,8 +104,6 @@ export const deleteComment = async (req, res) => {
                 if (deletedCount) { updatedPost.commentsCount = updatedPost.commentsCount - deletedCount; }
                 else { updatedPost.commentsCount = updatedPost.commentsCount--; }
 
-                console.log('updatedPost.commentsCount', updatedPost.commentsCount);
-
                 await updatedPost.save();
             } catch (error) {
                 console.error(error);
