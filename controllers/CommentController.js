@@ -104,6 +104,8 @@ export const deleteComment = async (req, res) => {
                 if (deletedCount) { updatedPost.commentsCount = updatedPost.commentsCount - deletedCount; }
                 else { updatedPost.commentsCount = updatedPost.commentsCount--; }
 
+                console.log('updatedPost.commentsCount', updatedPost.commentsCount);
+
                 await updatedPost.save();
             } catch (error) {
                 console.error(error);
@@ -125,8 +127,8 @@ export const deleteComment = async (req, res) => {
 
             res.json({ message: "Comment (and associated replies (if present)) have been removed" });
         }
-        else // Delete a reply
-        {
+        // Delete a reply
+        else if (req.body.commentParentId) {
             const removedComment = await CommentModel.findByIdAndDelete({ _id: commentId });
             if (!removedComment) { return res.status(404).json({ errorMessage: "Comment not found" }); }
             await decreaseCommentsCount();
