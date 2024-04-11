@@ -14,9 +14,11 @@ export const getAllHearts = async (req, res) => {
 
 
 
-export const getHeartByPostId = async (req, res) => {
+export const getHeartsByPostId = async (req, res) => {
     try {
         const foundHearts = await HeartModel.find({ postId: req.params.postId });
+        if (foundHearts.length === 0) { return res.status(404).json({ errorMessage: "Post's hearts not found" }); }
+
         res.json(foundHearts);
     }
     catch (error) {
@@ -74,7 +76,7 @@ export const createHeart = async (req, res) => {
 export const deleteByHeartIdAndPostId = async (req, res) => {
     try {
         const foundItem = await HeartModel.findOneAndDelete({ postId: req.params.postId, user: req.params.userId });
-        if (!foundItem) return res.status(404).json({ errorMessage: "Could not delete the heart, heart was not found" });
+        if (!foundItem) return res.status(404).json({ errorMessage: "Heart not found" });
 
         //Decrease heartsCount on the post
         await PostModel.findOneAndUpdate({ _id: req.params.postId }, { $inc: { heartsCount: -1 } });

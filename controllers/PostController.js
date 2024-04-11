@@ -28,31 +28,33 @@ export const createPost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
     try {
-        let allPosts = [];
+        let sortQuery = {};
 
         switch (req.query.sortBy) {
             case "new posts":
-                allPosts = await PostModel.find({}).sort({ createdAt: -1 }).populate("user").exec();
+                sortQuery = { createdAt: -1 };
                 break;
             case "old posts":
-                allPosts = await PostModel.find({}).sort({ createdAt: 1 }).populate("user").exec();
+                sortQuery = { createdAt: 1 };
                 break;
             case "ascending hearts":
-                allPosts = await PostModel.find({}).sort({ heartsCount: 1 }).populate("user").exec();
+                sortQuery = { heartsCount: 1 };
                 break;
             case "descending hearts":
-                allPosts = await PostModel.find({}).sort({ heartsCount: -1 }).populate("user").exec();
+                sortQuery = { heartsCount: -1 };
                 break;
             case "ascending views":
-                allPosts = await PostModel.find({}).sort({ viewsCount: 1 }).populate("user").exec();
+                sortQuery = { viewsCount: 1 };
                 break;
             case "descending views":
-                allPosts = await PostModel.find({}).sort({ viewsCount: -1 }).populate("user").exec();
+                sortQuery = { viewsCount: -1 };
                 break;
             default:
-                allPosts = await PostModel.find({}).sort({ createdAt: -1 }).populate("user").exec();
+                sortQuery = { createdAt: -1 };
                 break;
         }
+        
+        const allPosts = await PostModel.find({}).sort(sortQuery).populate("user").exec();
 
         // Remove "passwordHash" from JSON
         allPosts.forEach((e) => {
@@ -135,7 +137,7 @@ export const updatePost = async (req, res) => {
                 commentsCount: req.body.commentsCount,
             }
         );
-        if (!updatedPost) { return res.status(500).json({ errorMessage: "Could not update the post" }); }
+        if (!updatedPost) { return res.status(404).json({ errorMessage: "Post not found" }); }
 
         // Delete the old post img
         if (req.query.oldPostImg && req.query.oldPostImg !== process.env.NO_IMG) {

@@ -1,6 +1,6 @@
 import express from 'express';
-import * as HeartController from "../controllers/HeartController.js";
-import checkAuth from '../Utils/checkAuth.js';
+import * as HeartController from "../../controllers/HeartController.js";
+import checkAuth from '../../Utils/checkAuth.js';
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ const router = express.Router();
 //================================= 
 router.get("/", HeartController.getAllHearts);
 router.get("/hasUserHeart/:postId/:userId", checkAuth, HeartController.hasUserHeartedPost);
-router.get("/:postId", HeartController.getHeartByPostId);
+router.get("/:postId", HeartController.getHeartsByPostId);
 
 router.post("/:postId", checkAuth, HeartController.createHeart);
 

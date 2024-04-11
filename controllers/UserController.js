@@ -200,22 +200,22 @@ export const editUserInfo = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     try {
-        const foundUser = await UserModel.findOne({ _id: req.params.userId });
+        const foundUser = await UserModel.findOne({ _id: req.userId });
         if (!foundUser) { return res.status(404).json({ errorMessage: "Could not find the user" }); }
 
         const isPasswordValid = await bcrypt.compare(req.params.password, foundUser.passwordHash);
         if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect password" }); }
 
-        const deletedUser = await UserModel.findOneAndDelete({ _id: req.params.userId });
+        const deletedUser = await UserModel.findOneAndDelete({ _id: req.userId });
         if (!deletedUser) { return res.status(500).json({ errorMessage: "Could not delete the user" }); }
 
-        const deletedUserPosts = await PostModel.deleteMany({ user: req.params.userId });
+        const deletedUserPosts = await PostModel.deleteMany({ user: req.userId });
         if (!deletedUserPosts) { return res.status(500).json({ errorMessage: "Could not delete user's posts" }); }
 
-        const deletedUserComments = await CommentModel.deleteMany({ user: req.params.userId });
+        const deletedUserComments = await CommentModel.deleteMany({ user: req.userId });
         if (!deletedUserComments) { return res.status(500).json({ errorMessage: "Could not delete user's comments" }); }
 
-        const deletedUserHearts = await HeartModel.deleteMany({ user: req.params.userId });
+        const deletedUserHearts = await HeartModel.deleteMany({ user: req.userId });
         if (!deletedUserHearts) { return res.status(500).json({ errorMessage: "Could not delete user's hearts" }); }
 
         if (foundUser.userAvatar && foundUser.userAvatar !== process.env.NO_IMG) {

@@ -4,6 +4,7 @@ import PostModel from "../models/PostModel.js";
 export const getAllComments = async (req, res) => {
     try {
         const allComments = await CommentModel.find().populate("user").exec();
+
         res.json(allComments);
     }
     catch (error) {
@@ -20,7 +21,9 @@ export const getCommentsByPostId = async (req, res) => {
         const postId = req.params.id;
 
         const postComments = await CommentModel.find({ postId: postId }).populate("user").exec();
+        if (postComments.length === 0) { return res.status(404).json({ errorMessage: "Post's comments not found" }); }
         postComments.forEach((e) => { e.user.passwordHash = undefined; });
+
         res.json(postComments);
     }
     catch (error) {
@@ -31,11 +34,11 @@ export const getCommentsByPostId = async (req, res) => {
 
 
 
-export const getReplies = async (req, res) => {
+export const getCommentReplies = async (req, res) => {
     try {
         const parentCommentId = req.params.id;
         const commentReplies = await CommentModel.find({ commentParentId: parentCommentId }).populate("user").exec();
-
+        if (!commentReplies) { return res.status(404).json({ errorMessage: "Comment's replies not found" }); }
         res.json(commentReplies);
     }
     catch (error) {
@@ -81,7 +84,8 @@ export const updateComment = async (req, res) => {
     try {
         const commentId = req.params.id;
 
-        await CommentModel.findOneAndUpdate({ _id: commentId }, { text: req.body.text, isEdited: true });
+        const updatedComment = await CommentModel.findOneAndUpdate({ _id: commentId }, { text: req.body.text, isEdited: true });
+        if (!updatedComment) { return res.status(404).json({ errorMessage: "Comment not found" }); }
 
         res.json({ message: "Comment has been updated" });
     }

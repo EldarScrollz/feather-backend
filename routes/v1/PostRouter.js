@@ -1,8 +1,8 @@
 import express from 'express';
-import checkAuth from '../Utils/checkAuth.js';
-import { postValidation } from '../validations.js';
-import handleValidationsErrors from '../Utils/handleValidationsErrors.js';
-import * as PostController from "../controllers/PostController.js";
+import checkAuth from '../../Utils/checkAuth.js';
+import { postValidation } from '../../validations.js';
+import handleValidationsErrors from '../../Utils/handleValidationsErrors.js';
+import * as PostController from "../../controllers/PostController.js";
 
 const router = express.Router();
 
