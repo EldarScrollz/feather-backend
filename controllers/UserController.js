@@ -95,10 +95,8 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        res.cookie("accessToken");
-        res.clearCookie("accessToken");
-        res.cookie("refreshToken");
-        res.clearCookie("refreshToken");
+        res.clearCookie("accessToken", { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+        res.clearCookie("refreshToken", { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
 
         res.json({ message: "Logged out successfully" });
     } catch (error) {
