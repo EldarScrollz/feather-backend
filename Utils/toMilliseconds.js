@@ -1,6 +1,6 @@
 export const toMilliseconds = (time) => {
-    const timeType = time.slice(-1);
-    time = time.slice(0, -1); // Remove the last character of string.
+    const timeType = time?.slice(-1);
+    time = time?.slice(0, -1); // Remove the last character of string.
 
     switch (timeType) {
         case "s":

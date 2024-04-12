@@ -6,7 +6,7 @@ import UserModel from "../models/UserModel.js";
 import PostModel from "../models/PostModel.js";
 import CommentModel from "../models/CommentModel.js";
 import HeartModel from "../models/HeartModel.js";
-import { toMilliseconds } from "../Utils/toMilliseconds.js";
+import { accessTokenOptions, refreshTokenOptions } from "../configs/jwtCookieOptions.js";
 
 export const register = async (req, res) => {
     try {
@@ -33,12 +33,10 @@ export const register = async (req, res) => {
 
         // Create JWT
         const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
-        res.cookie("accessToken", accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+        res.cookie("accessToken", accessToken, accessTokenOptions);
         // Create refresh token
         const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
-        res.cookie("refreshToken", refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+        res.cookie("refreshToken", refreshToken, refreshTokenOptions);
 
         newUser.jwtRefreshToken = refreshToken;
         await newUser.save();
@@ -69,12 +67,10 @@ export const login = async (req, res) => {
 
         // Create access token
         const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
-        res.cookie("accessToken", accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+        res.cookie("accessToken", accessToken, accessTokenOptions);
         // Create refresh token
         const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
-        res.cookie("refreshToken", refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+        res.cookie("refreshToken", refreshToken, refreshTokenOptions);
 
         foundUser.jwtRefreshToken = refreshToken;
         foundUser.save();
@@ -95,8 +91,10 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        res.clearCookie("accessToken", { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
-        res.clearCookie("refreshToken", { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+        const { maxAge: maxAgeRefreshToken, ...clearAccessTokenOptions } = accessTokenOptions;
+        res.clearCookie("accessToken", clearAccessTokenOptions);
+        const { maxAge: maxAgeAccessToken, ...clearRefreshTokenOptions } = refreshTokenOptions;
+        res.clearCookie("refreshToken", clearRefreshTokenOptions);
 
         res.json({ message: "Logged out successfully" });
     } catch (error) {

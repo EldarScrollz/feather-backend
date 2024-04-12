@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import UserModel from "../models/UserModel.js";
-import { toMilliseconds } from "./toMilliseconds.js";
+import { accessTokenOptions, refreshTokenOptions } from "../configs/jwtCookieOptions.js";
 
 export default async (req, res, next) => {
     const { accessToken } = req.cookies;
@@ -28,14 +28,12 @@ export default async (req, res, next) => {
 
             // Access token.
             const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-            //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
-            res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+            res.cookie('accessToken', accessToken, accessTokenOptions);
             req.userId = foundUser._id;
 
             // Refresh token.
             const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-            //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
-            res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
+            res.cookie('refreshToken', refreshToken, refreshTokenOptions);
 
             foundUser.jwtRefreshToken = refreshToken;
             await foundUser.save();
