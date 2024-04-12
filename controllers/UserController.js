@@ -33,12 +33,12 @@ export const register = async (req, res) => {
 
         // Create JWT
         const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'None') shouldn't be included in the real project.
-        res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'None' });
+        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
+        res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
         // Create refresh token
         const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'None') shouldn't be included in the real project.
-        res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'None' });
+        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
+        res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
 
         newUser.jwtRefreshToken = refreshToken;
         await newUser.save();
@@ -69,12 +69,12 @@ export const login = async (req, res) => {
 
         // Create access token
         const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'None') shouldn't be included in the real project.
-        res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'None' });
+        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
+        res.cookie('accessToken', accessToken, { maxAge: toMilliseconds(process.env.ACCESS_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
         // Create refresh token
         const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        //! (secure: true, sameSite: 'None') shouldn't be included in the real project.
-        res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'None' });
+        //! (secure: true, sameSite: 'none') shouldn't be included in the real project.
+        res.cookie('refreshToken', refreshToken, { maxAge: toMilliseconds(process.env.REFRESH_TOKEN_EXPIRATION), httpOnly: true, secure: true, sameSite: 'none' });
 
         foundUser.jwtRefreshToken = refreshToken;
         foundUser.save();
