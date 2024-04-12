@@ -1,10 +1,12 @@
 import express from 'express';
-import checkAuth from '../../Utils/checkAuth.js';
+import {verifyJwt} from '../../Utils/verifyJwt.js';
 import { postValidation } from '../../validations.js';
 import handleValidationsErrors from '../../Utils/handleValidationsErrors.js';
-import * as PostController from "../../controllers/PostController.js";
+import * as PostController from "../../controllers/PostsController.js";
 
 const router = express.Router();
+
+//todo: change the names of the routes, exported router and js file
 
 //=================================
 // /posts
@@ -20,12 +22,12 @@ router.get("/topTags", PostController.getTopTags);
 router.get("/", PostController.getAllPosts);
 router.get("/:id", PostController.getPostById);
 
-// Authorized users only (checkAuth):
-router.post("/", checkAuth, postValidation, handleValidationsErrors, PostController.createPost);
+// Authorized users only (verifyJwt):
+router.post("/", verifyJwt, postValidation, handleValidationsErrors, PostController.createPost);
 
-router.patch("/:id", checkAuth, postValidation, handleValidationsErrors, PostController.updatePost);
+router.patch("/:id", verifyJwt, postValidation, handleValidationsErrors, PostController.updatePost);
 
-router.delete("/:id", checkAuth, PostController.deletePost);
+router.delete("/:id", verifyJwt, PostController.deletePost);
 // -----------------------------------------------------------------------------
 
-export { router as postRouter };
+export { router as postsRouter };

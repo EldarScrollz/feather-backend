@@ -29,7 +29,7 @@ export const multerInit = (app) => {
 
     app.use("/images", express.static("images")); // Tell express that we want to make a get request to get a static file
 
-    app.post("/upload", /* checkAuth, */ upload.single("image"), (req, res) => {
+    app.post("/upload", /* verifyJwt, */ upload.single("image"), (req, res) => {
         try {
             res.status(201).json(
                 {

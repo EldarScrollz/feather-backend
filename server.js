@@ -8,12 +8,15 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
 
-import { postRouter } from "./routes/v1/PostRouter.js";
+import { postsRouter } from "./routes/v1/PostsRouter.js";
 import { userRouter } from "./routes/v1/UserRouter.js";
-import { commentRouter } from "./routes/v1/CommentRouter.js";
-import { heartRouter } from "./routes/v1/HeartRouter.js";
+import { commentsRouter } from "./routes/v1/CommentsRouter.js";
+import { heartsRouter } from "./routes/v1/HeartsRouter.js";
 
 import { multerInit } from "./multer.js";
+
+//todo: create 'src' folder.
+//todo: convert project to TypeScript.
 
 const app = express(); // Create the app.
 app.use(express.json());  // To read json.
@@ -41,13 +44,15 @@ connect(process.env.MONGODB_URI)
 //==================================================================================================================
 // Routers
 //==================================================================================================================
+//todo: change from 'auth' to 'user'
 app.use("/v1/auth", userRouter);
-app.use("/v1/posts", postRouter);
-app.use("/v1/hearts", heartRouter);
-app.use("/v1/comments", commentRouter);
+app.use("/v1/posts", postsRouter);
+app.use("/v1/hearts", heartsRouter);
+app.use("/v1/comments", commentsRouter);
 
 
 //==================================================================================================================
 // Multer.
 //==================================================================================================================
+//todo: move 'no-img' from 'UI' folder to 'public' folder.
 multerInit(app);

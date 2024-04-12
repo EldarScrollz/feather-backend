@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import UserModel from "../models/UserModel.js";
 import { accessTokenOptions, refreshTokenOptions } from "../configs/jwtCookieOptions.js";
 
-export default async (req, res, next) => {
+export const verifyJwt = async (req, res, next) => {
     const { accessToken } = req.cookies;
 
     if (accessToken) {

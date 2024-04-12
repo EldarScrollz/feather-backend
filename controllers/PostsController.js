@@ -132,7 +132,7 @@ export const updatePost = async (req, res) => {
                 title: req.body.title,
                 text: req.body.text,
                 tags: req.body.tags,
-                user: req.userId, // We've put id of the user in the "userId" in "checkAuth.js"
+                user: req.userId, // We've put id of the user in the "userId" in "verifyJwt.js"
                 postImg: req.body.postImg,
                 commentsCount: req.body.commentsCount,
             }
