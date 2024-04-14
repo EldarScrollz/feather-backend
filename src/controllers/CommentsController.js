@@ -21,7 +21,6 @@ export const getCommentsByPostId = async (req, res) => {
         const postId = req.params.id;
 
         const postComments = await CommentModel.find({ postId: postId }).populate("user").exec();
-        if (postComments.length === 0) { return res.status(404).json({ errorMessage: "Post's comments not found" }); }
         postComments.forEach((e) => { e.user.passwordHash = undefined; });
 
         res.json(postComments);

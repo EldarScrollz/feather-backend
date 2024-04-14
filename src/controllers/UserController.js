@@ -6,9 +6,9 @@ import UserModel from "../models/UserModel.js";
 import PostModel from "../models/PostModel.js";
 import CommentModel from "../models/CommentModel.js";
 import HeartModel from "../models/HeartModel.js";
-import { accessTokenOptions, refreshTokenOptions } from "../configs/jwtCookieOptions.js";
+import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../configs/jwtCookieOptions.js";
 
-export const register = async (req, res) => {
+export const signUp = async (req, res) => {
     try {
         // Throw error if email exists
         const isUserEmailAlreadyInDB = await UserModel.findOne({ email: req.body.email });
@@ -33,10 +33,10 @@ export const register = async (req, res) => {
 
         // Create JWT
         const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        res.cookie("accessToken", accessToken, accessTokenOptions);
+        res.cookie("accessToken", accessToken, accessTokenCookieOptions);
         // Create refresh token
         const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        res.cookie("refreshToken", refreshToken, refreshTokenOptions);
+        res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
 
         newUser.jwtRefreshToken = refreshToken;
         await newUser.save();
@@ -55,7 +55,7 @@ export const register = async (req, res) => {
 
 
 
-export const login = async (req, res) => {
+export const signIn = async (req, res) => {
     try {
         // Find the user in the "users" collection by email and save him in "foundUser"
         const foundUser = await UserModel.findOne({ email: req.body.email });
@@ -67,10 +67,10 @@ export const login = async (req, res) => {
 
         // Create access token
         const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        res.cookie("accessToken", accessToken, accessTokenOptions);
+        res.cookie("accessToken", accessToken, accessTokenCookieOptions);
         // Create refresh token
         const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        res.cookie("refreshToken", refreshToken, refreshTokenOptions);
+        res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
 
         foundUser.jwtRefreshToken = refreshToken;
         foundUser.save();
@@ -89,11 +89,11 @@ export const login = async (req, res) => {
 
 
 
-export const logout = async (req, res) => {
+export const signOut = async (req, res) => {
     try {
-        const { maxAge: maxAgeRefreshToken, ...clearAccessTokenOptions } = accessTokenOptions;
+        const { maxAge: maxAgeRefreshToken, ...clearAccessTokenOptions } = accessTokenCookieOptions;
         res.clearCookie("accessToken", clearAccessTokenOptions);
-        const { maxAge: maxAgeAccessToken, ...clearRefreshTokenOptions } = refreshTokenOptions;
+        const { maxAge: maxAgeAccessToken, ...clearRefreshTokenOptions } = refreshTokenCookieOptions;
         res.clearCookie("refreshToken", clearRefreshTokenOptions);
 
         res.json({ message: "Logged out successfully" });
@@ -124,7 +124,7 @@ export const getUserInfo = async (req, res) => {
 
 
 
-export const editUserInfo = async (req, res) => {
+export const editUser = async (req, res) => {
     try {
         // Utility --------------------------------------------------------------------------------------
         const deleteOldAvatar = () => {
@@ -207,6 +207,7 @@ export const deleteUser = async (req, res) => {
         const deletedUser = await UserModel.findOneAndDelete({ _id: req.userId });
         if (!deletedUser) { return res.status(500).json({ errorMessage: "Could not delete the user" }); }
 
+        const userPosts = await PostModel.find({ user: req.userId });
         const deletedUserPosts = await PostModel.deleteMany({ user: req.userId });
         if (!deletedUserPosts) { return res.status(500).json({ errorMessage: "Could not delete user's posts" }); }
 
@@ -216,14 +217,27 @@ export const deleteUser = async (req, res) => {
         const deletedUserHearts = await HeartModel.deleteMany({ user: req.userId });
         if (!deletedUserHearts) { return res.status(500).json({ errorMessage: "Could not delete user's hearts" }); }
 
+        // Delete avatar.
         if (foundUser.userAvatar && foundUser.userAvatar !== process.env.NO_IMG) {
-            fs.unlink(`./${foundUser.userAvatar}`, (error => {
+            fs.unlink(`src/${foundUser.userAvatar}`, (error => {
                 if (error) {
                     console.error("Could not delete user's avatar", error);
                     return res.status(500).json({ errorMessage: "Could not delete user's avatar" });
                 }
             }));
         }
+
+        // Delete posts' images
+        userPosts.forEach((e) => {
+            if (e.postImg !== process.env.NO_IMG) {
+                fs.unlink(`src/${e.postImg}`, (error => {
+                    if (error) {
+                        console.error("Could not delete posts's image", error);
+                        return res.status(500).json({ errorMessage: "Could not delete posts's image" });
+                    }
+                }));
+            }
+        });
 
         res.clearCookie("accessToken");
         res.clearCookie("refreshToken");

@@ -102,7 +102,7 @@ export const deletePost = async (req, res) => {
         if (!removedPost) { return res.status(404).json({ errorMessage: "Post not found" }); }
 
         if (removedPost.postImg !== process.env.NO_IMG) {
-            fs.unlink(`./${removedPost.postImg}`, (error => {
+            fs.unlink(`src/${removedPost.postImg}`, (error => {
                 if (error) {
                     console.error("Could not delete posts's image", error);
                     return res.status(500).json({ errorMessage: "Could not delete posts's image" });
@@ -141,7 +141,7 @@ export const updatePost = async (req, res) => {
 
         // Delete the old post img
         if (req.query.oldPostImg && req.query.oldPostImg !== process.env.NO_IMG) {
-            fs.unlink(`./${req.query.oldPostImg}`, (error => {
+            fs.unlink(`src/${req.query.oldPostImg}`, (error => {
                 if (error) {
                     console.error("Could not delete old posts's image", error);
                     return res.status(500).json({ errorMessage: "Could not delete old posts's image" });

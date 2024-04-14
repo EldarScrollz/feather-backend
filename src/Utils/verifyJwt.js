@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import UserModel from "../models/UserModel.js";
-import { accessTokenOptions, refreshTokenOptions } from "../configs/jwtCookieOptions.js";
+import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../configs/jwtCookieOptions.js";
 
 export const verifyJwt = async (req, res, next) => {
     const { accessToken } = req.cookies;
@@ -28,12 +28,12 @@ export const verifyJwt = async (req, res, next) => {
 
             // Access token.
             const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-            res.cookie('accessToken', accessToken, accessTokenOptions);
+            res.cookie('accessToken', accessToken, accessTokenCookieOptions);
             req.userId = foundUser._id;
 
             // Refresh token.
             const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-            res.cookie('refreshToken', refreshToken, refreshTokenOptions);
+            res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
 
             foundUser.jwtRefreshToken = refreshToken;
             await foundUser.save();

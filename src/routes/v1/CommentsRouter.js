@@ -6,11 +6,6 @@ import { commentValidation } from '../../validations.js';
 
 const router = express.Router();
 
-//todo: change the names of the routes, exported router and js file
-
-//=================================
-// /comments
-//=================================
 router.get("/", CommentController.getAllComments);
 router.get("/replies/:id", CommentController.getCommentReplies);
 router.get("/:id", CommentController.getCommentsByPostId);

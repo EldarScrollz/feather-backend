@@ -6,15 +6,10 @@ import * as PostController from "../../controllers/PostsController.js";
 
 const router = express.Router();
 
-//todo: change the names of the routes, exported router and js file
-
-//=================================
-// /posts
-//=================================
 // --------------------------------
 // Hearts/Tags
 // --------------------------------
-router.get("/topTags", PostController.getTopTags);
+router.get("/top-tags", PostController.getTopTags);
 
 // --------------------------------
 // Posts CRUD

@@ -5,7 +5,7 @@ export const multerInit = (app) => {
     const storage = multer.diskStorage( // Var name must be "storage"
         {
             destination: (_, __, cb) => {
-                cb(null, "images");
+                cb(null, "src/images");
             },
             filename: (_, file, cb) => {
                 cb(null, Date.now() + "-" + file.originalname);
@@ -27,7 +27,7 @@ export const multerInit = (app) => {
             }
         });
 
-    app.use("/images", express.static("images")); // Tell express that we want to make a get request to get a static file
+    app.use("/images", express.static("src/images")); // Tell express that we want to make a get request to get a static file
 
     app.post("/upload", /* verifyJwt, */ upload.single("image"), (req, res) => {
         try {

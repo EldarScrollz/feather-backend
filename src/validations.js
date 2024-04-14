@@ -21,9 +21,9 @@ export const loginValidation =
 
 export const editProfileValidation =
     [
-        body("email").isLength({ max: 100 }).isEmail(),
-        body("password").isLength({ min: 4, max: 1000 }),
-        body("name").isLength({ max: 32 }),
+        body("email").optional().isLength({ max: 100 }).isEmail(),
+        body("password").optional().isLength({ min: 4, max: 1000 }),
+        body("name").optional().isLength({ max: 32 }),
         body("userAvatar").optional().isString()
     ];
 

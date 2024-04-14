@@ -1,5 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
+import 'dotenv/config'
 
 import express from "express";
 import { rateLimit } from "express-rate-limit";
@@ -15,7 +16,6 @@ import { heartsRouter } from "./routes/v1/HeartsRouter.js";
 
 import { multerInit } from "./multer.js";
 
-//todo: create 'src' folder.
 //todo: convert project to TypeScript.
 
 const app = express(); // Create the app.
@@ -35,8 +35,8 @@ app.use(limiter); // Apply the rate limiting middleware.
 // Connect to the database (MongoDB).
 connect(process.env.MONGODB_URI)
     .then(() => {
-        console.log("Connected to MongoDB");
-        app.listen(process.env.PORT, () => console.log(`Server is running on port: ${process.env.PORT}`));
+        console.log("--- Connected to MongoDB");
+        app.listen(process.env.PORT, () => console.log(`--- Server is running on port: ${process.env.PORT}`));
     })
     .catch((error) => { console.error("Failed to connect to MongoDB", error); });
 
@@ -44,8 +44,7 @@ connect(process.env.MONGODB_URI)
 //==================================================================================================================
 // Routers
 //==================================================================================================================
-//todo: change from 'auth' to 'user'
-app.use("/v1/auth", userRouter);
+app.use("/v1/user", userRouter);
 app.use("/v1/posts", postsRouter);
 app.use("/v1/hearts", heartsRouter);
 app.use("/v1/comments", commentsRouter);
@@ -54,5 +53,4 @@ app.use("/v1/comments", commentsRouter);
 //==================================================================================================================
 // Multer.
 //==================================================================================================================
-//todo: move 'no-img' from 'UI' folder to 'public' folder.
 multerInit(app);
