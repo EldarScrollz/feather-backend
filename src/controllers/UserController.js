@@ -6,7 +6,7 @@ import UserModel from "../models/UserModel.js";
 import PostModel from "../models/PostModel.js";
 import CommentModel from "../models/CommentModel.js";
 import HeartModel from "../models/HeartModel.js";
-import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../configs/jwtCookieOptions.js";
+import * as jwtConfig from "../configs/jwtConfig.js";
 
 export const signUp = async (req, res) => {
     try {
@@ -32,11 +32,11 @@ export const signUp = async (req, res) => {
         });
 
         // Create JWT
-        const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+        const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: jwtConfig.accessTokenExpiration });
+        res.cookie("accessToken", accessToken, jwtConfig.accessTokenCookieOptions);
         // Create refresh token
-        const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+        const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: jwtConfig.refreshTokenExpiration });
+        res.cookie("refreshToken", refreshToken, jwtConfig.refreshTokenCookieOptions);
 
         newUser.jwtRefreshToken = refreshToken;
         await newUser.save();
@@ -66,11 +66,11 @@ export const signIn = async (req, res) => {
         if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect username or password" }); }
 
         // Create access token
-        const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-        res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+        const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: jwtConfig.accessTokenExpiration });
+        res.cookie("accessToken", accessToken, jwtConfig.accessTokenCookieOptions);
         // Create refresh token
-        const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-        res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+        const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: jwtConfig.refreshTokenExpiration });
+        res.cookie("refreshToken", refreshToken, jwtConfig.refreshTokenCookieOptions);
 
         foundUser.jwtRefreshToken = refreshToken;
         foundUser.save();
@@ -79,7 +79,7 @@ export const signIn = async (req, res) => {
         const { passwordHash, jwtRefreshToken, ...userData } = foundUser._doc;
 
         // Return the document and JWT
-        res.status(201).json({ ...userData/*, accessToken*/ });
+        res.status(201).json({ ...userData });
     }
     catch (error) {
         console.error(error);
@@ -91,9 +91,9 @@ export const signIn = async (req, res) => {
 
 export const signOut = async (req, res) => {
     try {
-        const { maxAge: maxAgeRefreshToken, ...clearAccessTokenOptions } = accessTokenCookieOptions;
+        const { maxAge: maxAgeRefreshToken, ...clearAccessTokenOptions } = jwtConfig.accessTokenCookieOptions;
         res.clearCookie("accessToken", clearAccessTokenOptions);
-        const { maxAge: maxAgeAccessToken, ...clearRefreshTokenOptions } = refreshTokenCookieOptions;
+        const { maxAge: maxAgeAccessToken, ...clearRefreshTokenOptions } = jwtConfig.refreshTokenCookieOptions;
         res.clearCookie("refreshToken", clearRefreshTokenOptions);
 
         res.json({ message: "Logged out successfully" });
