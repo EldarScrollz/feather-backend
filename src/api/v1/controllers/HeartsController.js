@@ -1,5 +1,5 @@
-import HeartModel from "../models/HeartModel.js";
-import PostModel from "../models/PostModel.js";
+import {HeartModel} from "../models/HeartModel.js";
+import {PostModel} from "../models/PostModel.js";
 
 export const getAllHearts = async (req, res) => {
     try {

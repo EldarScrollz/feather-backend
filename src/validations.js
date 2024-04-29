@@ -5,7 +5,7 @@ import { body } from "express-validator";
 //========================================================
 // Auth
 //========================================================
-export const registerValidation =
+export const signUpValidation =
     [
         body("email").isLength({ max: 100 }).isEmail(),
         body("password").isLength({ min: 4, max: 1000 }),
@@ -13,13 +13,13 @@ export const registerValidation =
         body("userAvatar").optional().isString()
     ];
 
-export const loginValidation =
+export const signInValidation =
     [
         body("email").isLength({ max: 100 }).isEmail(),
         body("password").isLength({ max: 1000 }),
     ];
 
-export const editProfileValidation =
+export const editUserValidation =
     [
         body("email").optional().isLength({ max: 100 }).isEmail(),
         body("password").optional().isLength({ min: 4, max: 1000 }),

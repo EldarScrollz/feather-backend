@@ -1,6 +1,6 @@
-import PostModel from "../models/PostModel.js";
-import CommentModel from "../models/CommentModel.js";
-import HeartModel from "../models/HeartModel.js";
+import {PostModel} from "../models/PostModel.js";
+import { CommentModel } from "../models/CommentModel.js";
+import { HeartModel } from "../models/HeartModel.js";
 import fs from "fs";
 
 export const createPost = async (req, res) => {
@@ -53,7 +53,7 @@ export const getAllPosts = async (req, res) => {
                 sortQuery = { createdAt: -1 };
                 break;
         }
-        
+
         const allPosts = await PostModel.find({}).sort(sortQuery).populate("user").exec();
 
         // Remove "passwordHash" from JSON

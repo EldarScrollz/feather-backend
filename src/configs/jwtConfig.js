@@ -1,4 +1,4 @@
-import { toMilliseconds } from "../Utils/toMilliseconds.js";
+import { toMilliseconds } from "../api/v1/utils/toMilliseconds.js";
 
 export const accessTokenExpiration = "5m";
 export const refreshTokenExpiration = "30d";

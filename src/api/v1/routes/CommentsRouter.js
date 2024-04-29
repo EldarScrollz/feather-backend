@@ -1,8 +1,8 @@
 import express from 'express';
-import * as CommentController from "../../controllers/CommentsController.js";
-import {verifyJwt} from '../../Utils/verifyJwt.js';
-import handleValidationsErrors from '../../Utils/handleValidationsErrors.js';
-import { commentValidation } from '../../validations.js';
+import * as CommentController from "../controllers/CommentsController.js";
+import {verifyJwt} from '../utils/verifyJwt.js';
+import {handleValidationsErrors} from '../utils/handleValidationsErrors.js';
+import { commentValidation } from '../../../validations.js';
 
 const router = express.Router();
 

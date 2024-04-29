@@ -1,5 +1,7 @@
-import CommentModel from "../models/CommentModel.js";
-import PostModel from "../models/PostModel.js";
+import { CommentModel } from "../models/CommentModel.js";
+import { PostModel } from "../models/PostModel.js";
+
+
 
 export const getAllComments = async (req, res) => {
     try {

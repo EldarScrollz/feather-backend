@@ -1,8 +1,8 @@
 import express from 'express';
-import { registerValidation as signUpValidation, loginValidation as signInValidation, editProfileValidation as editUserValidation } from "../../validations.js";
-import handleValidationsErrors from "../../Utils/handleValidationsErrors.js";
-import { verifyJwt } from "../../Utils/verifyJwt.js";
-import * as UserController from "../../controllers/UserController.js";
+import { signUpValidation, signInValidation, editUserValidation } from "../../../validations.js";
+import { handleValidationsErrors } from "../utils/handleValidationsErrors.js";
+import { verifyJwt } from "../utils/verifyJwt.js";
+import * as UserController from "../controllers/UserController.js";
 
 const router = express.Router();
 

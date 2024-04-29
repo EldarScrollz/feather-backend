@@ -1,8 +1,8 @@
 import express from 'express';
-import {verifyJwt} from '../../Utils/verifyJwt.js';
-import { postValidation } from '../../validations.js';
-import handleValidationsErrors from '../../Utils/handleValidationsErrors.js';
-import * as PostController from "../../controllers/PostsController.js";
+import { verifyJwt } from '../utils/verifyJwt.js';
+import { postValidation } from '../../../validations.js';
+import { handleValidationsErrors } from '../utils/handleValidationsErrors.js';
+import * as PostController from "../controllers/PostsController.js";
 
 const router = express.Router();
 

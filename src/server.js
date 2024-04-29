@@ -1,5 +1,3 @@
-// import dotenv from "dotenv";
-// dotenv.config();
 import 'dotenv/config'
 
 import express from "express";
@@ -9,10 +7,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
 
-import { postsRouter } from "./routes/v1/PostsRouter.js";
-import { userRouter } from "./routes/v1/UserRouter.js";
-import { commentsRouter } from "./routes/v1/CommentsRouter.js";
-import { heartsRouter } from "./routes/v1/HeartsRouter.js";
+import { postsRouter } from "./api/v1/routes/PostsRouter.js";
+import { userRouter } from "./api/v1/routes/UserRouter.js";
+import { commentsRouter } from "./api/v1/routes/CommentsRouter.js";
+import { heartsRouter } from "./api/v1/routes/HeartsRouter.js";
 
 import { multerInit } from "./multer.js";
 

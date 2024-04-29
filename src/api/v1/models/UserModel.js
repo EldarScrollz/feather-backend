@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema( // Create schema -> fill it with propert
         timestamps: true, // Scheme should automatically create timestamps
     });
 
-export default mongoose.model("users", UserSchema);
+export const UserModel = mongoose.model("users", UserSchema);
 // Now we create a model called "users" that is based on our schema
 // we use export "default mongoose.model("users", UserSchema)" because:
 //  "You can have one default export per file. You can give this any name you like".
