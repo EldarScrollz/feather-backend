@@ -2,11 +2,11 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import fs from "fs";
 
-import UserModel from "../models/UserModel.js";
-import PostModel from "../models/PostModel.js";
-import CommentModel from "../models/CommentModel.js";
-import HeartModel from "../models/HeartModel.js";
-import * as jwtConfig from "../configs/jwtConfig.js";
+import { UserModel } from "../models/UserModel.js";
+import {PostModel} from "../models/PostModel.js";
+import { CommentModel } from "../models/CommentModel.js";
+import { HeartModel } from "../models/HeartModel.js";
+import * as jwtConfig from "../../../configs/jwtConfig.js";
 
 export const signUp = async (req, res) => {
     try {

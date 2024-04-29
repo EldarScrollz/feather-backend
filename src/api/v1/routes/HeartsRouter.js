@@ -1,6 +1,6 @@
 import express from 'express';
-import * as HeartController from "../../controllers/HeartsController.js";
-import {verifyJwt} from '../../Utils/verifyJwt.js';
+import * as HeartController from "../controllers/HeartsController.js";
+import {verifyJwt} from '../utils/verifyJwt.js';
 
 const router = express.Router();
 

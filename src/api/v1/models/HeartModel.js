@@ -9,4 +9,4 @@ const HeartSchema = new mongoose.Schema(
         timestamps: true,
     });
 
-export default mongoose.model("hearts", HeartSchema);
+export const HeartModel = mongoose.model("hearts", HeartSchema);
