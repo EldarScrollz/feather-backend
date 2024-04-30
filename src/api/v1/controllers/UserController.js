@@ -32,10 +32,10 @@ export const signUp = async (req, res) => {
         });
 
         // Create JWT
-        const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: jwtConfig.accessTokenExpiration });
+        const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
         res.cookie("accessToken", accessToken, jwtConfig.accessTokenCookieOptions);
         // Create refresh token
-        const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: jwtConfig.refreshTokenExpiration });
+        const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
         res.cookie("refreshToken", refreshToken, jwtConfig.refreshTokenCookieOptions);
 
         newUser.jwtRefreshToken = refreshToken;
@@ -66,10 +66,10 @@ export const signIn = async (req, res) => {
         if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect username or password" }); }
 
         // Create access token
-        const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: jwtConfig.accessTokenExpiration });
+        const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
         res.cookie("accessToken", accessToken, jwtConfig.accessTokenCookieOptions);
         // Create refresh token
-        const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: jwtConfig.refreshTokenExpiration });
+        const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
         res.cookie("refreshToken", refreshToken, jwtConfig.refreshTokenCookieOptions);
 
         foundUser.jwtRefreshToken = refreshToken;

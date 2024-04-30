@@ -27,12 +27,12 @@ export const verifyJwt = async (req, res, next) => {
             if (!foundUser) { return res.status(404).json({ errorMessage: "Could not find the user based on a refresh token" }); }
 
             // Access token.
-            const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: jwtConfig.accessTokenExpiration });
+            const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
             res.cookie('accessToken', accessToken, jwtConfig.accessTokenCookieOptions);
             req.userId = foundUser._id;
 
             // Refresh token.
-            const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: jwtConfig.refreshTokenExpiration });
+            const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
             res.cookie('refreshToken', refreshToken, jwtConfig.refreshTokenCookieOptions);
 
             foundUser.jwtRefreshToken = refreshToken;
