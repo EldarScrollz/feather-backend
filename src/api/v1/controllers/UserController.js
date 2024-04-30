@@ -3,10 +3,12 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 
 import { UserModel } from "../models/UserModel.js";
-import {PostModel} from "../models/PostModel.js";
+import { PostModel } from "../models/PostModel.js";
 import { CommentModel } from "../models/CommentModel.js";
 import { HeartModel } from "../models/HeartModel.js";
 import * as jwtConfig from "../../../configs/jwtConfig.js";
+
+//todo: change '._doc' to '.toObject()'
 
 export const signUp = async (req, res) => {
     try {
@@ -42,14 +44,14 @@ export const signUp = async (req, res) => {
         await newUser.save();
 
         // Copy everything except passwordHash from newUser document (no need to include passwordHash in the response)
-        const { passwordHash, jwtRefreshToken, ...userData } = newUser._doc;
+        const { passwordHash, jwtRefreshToken, ...userData } = newUser.toObject();
 
         // Return the document and JWT as one object
         res.status(201).json({ ...userData, accessToken });
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ errorMessage: "Could not register" });
+        res.status(500).json({ errorMessage: "Could not sign up." });
     }
 };
 
@@ -59,11 +61,11 @@ export const signIn = async (req, res) => {
     try {
         // Find the user in the "users" collection by email and save him in "foundUser"
         const foundUser = await UserModel.findOne({ email: req.body.email });
-        if (!foundUser) { return res.status(400).json({ errorMessage: "Incorrect username or password" }); }
+        if (!foundUser) { return res.status(400).json({ errorMessage: "Incorrect username or password." }); }
 
         // Comparing password from request and passwordhash from foundUser
         const isPasswordValid = await bcrypt.compare(req.body.password, foundUser.passwordHash);
-        if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect username or password" }); }
+        if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect username or password." }); }
 
         // Create access token
         const accessToken = jwt.sign({ _id: foundUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
@@ -76,14 +78,14 @@ export const signIn = async (req, res) => {
         foundUser.save();
 
         // Copy everything except passwordHash from foundUser document (no need to include passwordHash in the response)
-        const { passwordHash, jwtRefreshToken, ...userData } = foundUser._doc;
+        const { passwordHash, jwtRefreshToken, ...userData } = foundUser.toObject();
 
         // Return the document and JWT
         res.status(201).json({ ...userData });
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ errorMessage: "Could not sign in" });
+        res.status(500).json({ errorMessage: "Could not sign in." });
     }
 };
 
@@ -96,10 +98,10 @@ export const signOut = async (req, res) => {
         const { maxAge: maxAgeAccessToken, ...clearRefreshTokenOptions } = jwtConfig.refreshTokenCookieOptions;
         res.clearCookie("refreshToken", clearRefreshTokenOptions);
 
-        res.json({ message: "Logged out successfully" });
+        res.json({ message: "Signed out successfully." });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ errorMessage: "Could not logout" });
+        res.status(500).json({ errorMessage: "Could not sign out." });
     }
 };
 
@@ -126,21 +128,6 @@ export const getUserInfo = async (req, res) => {
 
 export const editUser = async (req, res) => {
     try {
-        // Utility --------------------------------------------------------------------------------------
-        const deleteOldAvatar = () => {
-            if (foundUser.userAvatar !== process.env.NO_IMG && req.query.oldAvatar) {
-                fs.unlink(`./${foundUser.userAvatar}`, (error => {
-                    if (error) {
-                        console.error("Could not delete user's avatar", error);
-                        return res.status(500).json({ errorMessage: "Could not delete user's avatar" });
-                    }
-                }));
-            }
-        };
-        //-----------------------------------------------------------------------------------------------
-
-
-
         const foundUser = await UserModel.findById(req.userId);
 
         // No password change -------------------------
@@ -154,19 +141,24 @@ export const editUser = async (req, res) => {
                 },
                 { new: true }
             );
+            if (!editedUser) {
+                return res.status(500).json({ errorMessage: "Could not edit the user." });
+            }
 
-            deleteOldAvatar();
+            deleteOldAvatar(foundUser, req.body.oldAvatar);
 
-            return res.json(editedUser);
+            const { jwtRefreshToken, ...userData } = editedUser.toObject();
+
+            return res.json(userData);
         }
         //---------------------------------------------
 
 
         // Includes changing the password --------------------------------------------------------------------------------------------------------
         const isPasswordValid = await bcrypt.compare(req.body.currentPassword, foundUser.passwordHash);
-        if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect password" }); }
+        if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect password." }); }
 
-        if (req.body.newPassword !== req.body.confirmNewPassword) { return res.status(400).json({ errorMessage: "Passwords do not match" }); }
+        if (req.body.newPassword !== req.body.confirmNewPassword) { return res.status(400).json({ errorMessage: "Passwords do not match." }); }
 
         // Encrypt the password
         const salt = await bcrypt.genSalt(10);
@@ -182,15 +174,22 @@ export const editUser = async (req, res) => {
             },
             { new: true }
         );
+        if (!editedUser) {
+            return res.status(500).json({ errorMessage: "Could not edit the user." });
+        }
 
-        deleteOldAvatar();
+        if (!deleteOldAvatar(foundUser, req.body.oldAvatar)) {
+            return res.status(500).json({ errorMessage: "Could not delete user's avatar." });
+        }
 
-        res.json(editedUser);
-        //----------------------------------------------------------------------------------------------------------------------------------------
+        const { jwtRefreshToken, ...userData } = editedUser.toObject();
+
+        res.json(userData);
+        //---------------------------------------------------------
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ errorMessage: "Could not edit user's data" });
+        res.status(500).json({ errorMessage: "Could not edit user's data." });
     }
 };
 
@@ -239,8 +238,10 @@ export const deleteUser = async (req, res) => {
             }
         });
 
-        res.clearCookie("accessToken");
-        res.clearCookie("refreshToken");
+        const { maxAge: maxAgeRefreshToken, ...clearAccessTokenOptions } = jwtConfig.accessTokenCookieOptions;
+        res.clearCookie("accessToken", clearAccessTokenOptions);
+        const { maxAge: maxAgeAccessToken, ...clearRefreshTokenOptions } = jwtConfig.refreshTokenCookieOptions;
+        res.clearCookie("refreshToken", clearRefreshTokenOptions);
 
         res.json({ message: "User has been completely deleted" });
     }
@@ -248,4 +249,22 @@ export const deleteUser = async (req, res) => {
         console.error(error);
         res.status(500).json({ errorMessage: "Could not delete the user" });
     }
+};
+
+
+
+//==================================================================================================================
+// Utils
+//==================================================================================================================
+const deleteOldAvatar = (foundUser, oldAvatar) => {
+    if (foundUser?.userAvatar !== process.env.NO_IMG && oldAvatar) {
+        fs.unlink(`./${foundUser?.userAvatar}`, (error => {
+            if (error) {
+                console.error("Could not delete user's avatar.", error);
+                return false;
+            }
+        }));
+    }
+
+    return true;
 };
