@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-// todo: migrate to Zod instead of express-validator?
+// todo: migrate to Zod instead of express-validator.
 
 //========================================================
 // Auth

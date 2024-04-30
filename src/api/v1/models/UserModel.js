@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+
+
 const UserSchema = new mongoose.Schema( // Create schema -> fill it with properties -> fill properties
     {                                   // with options if property is not optional.
         email: { type: String, required: true, unique: true, },

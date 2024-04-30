@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import {UserModel} from "../models/UserModel.js";
-import * as jwtConfig from "../../../configs/jwtConfig.js";
+import { UserModel } from "../models/UserModel.js";
+import * as jwtConfig from "../../../config/jwtConfig.js";
 
 export const verifyJwt = async (req, res, next) => {
     const { accessToken } = req.cookies;
@@ -12,9 +12,7 @@ export const verifyJwt = async (req, res, next) => {
 
             next();
         }
-        catch (error) {
-            return res.status(403).json({ errorMessage: "Invalid access token" });
-        }
+        catch (error) { return res.status(403).json({ errorMessage: "Invalid access token" }); }
     }
     else {
         try {

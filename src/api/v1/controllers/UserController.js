@@ -6,19 +6,19 @@ import { UserModel } from "../models/UserModel.js";
 import { PostModel } from "../models/PostModel.js";
 import { CommentModel } from "../models/CommentModel.js";
 import { HeartModel } from "../models/HeartModel.js";
-import * as jwtConfig from "../../../configs/jwtConfig.js";
+import * as jwtConfig from "../../../config/jwtConfig.js";
 
-//todo: change '._doc' to '.toObject()'
+
 
 export const signUp = async (req, res) => {
     try {
         // Throw error if email exists
-        const isUserEmailAlreadyInDB = await UserModel.findOne({ email: req.body.email });
-        if (isUserEmailAlreadyInDB) { return res.status(400).json({ errorMessage: "The email already exists" }); }
+        const isEmailInDb = await UserModel.findOne({ email: req.body.email });
+        if (isEmailInDb) { return res.status(400).json({ errorMessage: "The email already exists" }); }
 
         // Throw error if name exists
-        const isUserNameAlreadyInDB = await UserModel.findOne({ name: req.body.name });
-        if (isUserNameAlreadyInDB) { return res.status(400).json({ errorMessage: "The name already exists" }); }
+        const isNameInDB = await UserModel.findOne({ name: req.body.name });
+        if (isNameInDB) { return res.status(400).json({ errorMessage: "The name already exists" }); }
 
         // Encrypt the password
         const salt = await bcrypt.genSalt(10);
@@ -113,7 +113,7 @@ export const getUserInfo = async (req, res) => {
         if (!foundUser) { return res.status(404).json({ errorMessage: "User not found" }); }
 
         // Copy everything except passwordHash from foundUser document (no need to include passwordHash in the response)
-        const { passwordHash, ...userData } = foundUser._doc;
+        const { passwordHash, ...userData } = foundUser.toObject();
 
         // Return the document
         res.json({ ...userData });
@@ -130,7 +130,9 @@ export const editUser = async (req, res) => {
     try {
         const foundUser = await UserModel.findById(req.userId);
 
-        // No password change -------------------------
+        //==================================================================
+        // Doesn't include changing the password
+        //==================================================================
         if (!req.body.isChangePassword) {
             const editedUser = await UserModel.findOneAndUpdate(
                 { _id: req.userId },
@@ -151,10 +153,9 @@ export const editUser = async (req, res) => {
 
             return res.json(userData);
         }
-        //---------------------------------------------
-
-
-        // Includes changing the password --------------------------------------------------------------------------------------------------------
+        //==================================================================
+        // Includes changing the password
+        //==================================================================
         const isPasswordValid = await bcrypt.compare(req.body.currentPassword, foundUser.passwordHash);
         if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect password." }); }
 
@@ -185,7 +186,6 @@ export const editUser = async (req, res) => {
         const { jwtRefreshToken, ...userData } = editedUser.toObject();
 
         res.json(userData);
-        //---------------------------------------------------------
     }
     catch (error) {
         console.error(error);
