@@ -52,7 +52,7 @@ export const getCommentReplies = async (req, res) => {
 
 export const createComment = async (req, res) => {
     try {
-        const postOfComment = await PostModel.findOneAndUpdate(
+        const postOfComment = await PostModel.findByIdAndUpdate(
             { _id: req.body.postId },
             { $inc: { commentsCount: 1 } }
         );
@@ -69,7 +69,7 @@ export const createComment = async (req, res) => {
         await newComment.save();
 
         // Inc main comment's repliesCount when adding a reply
-        if (req.body.commentParentId) { await CommentModel.findOneAndUpdate({ _id: req.body.commentParentId }, { $inc: { repliesCount: 1 } }); }
+        if (req.body.commentParentId) { await CommentModel.findByIdAndUpdate({ _id: req.body.commentParentId }, { $inc: { repliesCount: 1 } }); }
 
         res.status(201).json(newComment);
     }
@@ -85,7 +85,7 @@ export const updateComment = async (req, res) => {
     try {
         const commentId = req.params.id;
 
-        const updatedComment = await CommentModel.findOneAndUpdate({ _id: commentId }, { text: req.body.text, isEdited: true });
+        const updatedComment = await CommentModel.findByIdAndUpdate({ _id: commentId }, { text: req.body.text, isEdited: true });
         if (!updatedComment) { return res.status(404).json({ errorMessage: "Comment not found" }); }
 
         res.json({ message: "Comment has been updated" });
@@ -136,7 +136,7 @@ export const deleteComment = async (req, res) => {
             if (!removedComment) { return res.status(404).json({ errorMessage: "Comment not found" }); }
             await decreaseCommentsCount();
             // Decrease repliesCount when deleting main comment's reply
-            await CommentModel.findOneAndUpdate({ _id: req.body.commentParentId }, { $inc: { repliesCount: -1 } });
+            await CommentModel.findByIdAndUpdate({ _id: req.body.commentParentId }, { $inc: { repliesCount: -1 } });
 
             res.json({ message: "Comment has been removed" });
         }

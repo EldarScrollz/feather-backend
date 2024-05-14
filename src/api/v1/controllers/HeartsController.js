@@ -49,7 +49,7 @@ export const createHeart = async (req, res) => {
 
         // Check if the heart is already on the post
         const thePost = await HeartModel.findOne({ postId: req.params.postId });
-        if (thePost && thePost.user.toString() === req.userId) { return res.status(409).json({ errorMessage: "The heart already exists on the post" }); }
+        if (thePost && thePost.user.toString() === req.userId) { return res.status(409).json({ errorMessage: "Heart already exists on the post" }); }
 
         const newHeart = new HeartModel(
             {
@@ -60,7 +60,7 @@ export const createHeart = async (req, res) => {
         await newHeart.save();
 
         //Increase heartsCount on the post
-        await PostModel.findOneAndUpdate({ _id: req.params.postId }, { $inc: { heartsCount: 1 } });
+        await PostModel.findByIdAndUpdate({ _id: req.params.postId }, { $inc: { heartsCount: 1 } });
 
         res.status(201).json(newHeart);
     }
@@ -78,7 +78,7 @@ export const deleteByHeartIdAndPostId = async (req, res) => {
         if (!foundItem) return res.status(404).json({ errorMessage: "Heart not found" });
 
         //Decrease heartsCount on the post
-        await PostModel.findOneAndUpdate({ _id: req.params.postId }, { $inc: { heartsCount: -1 } });
+        await PostModel.findByIdAndUpdate({ _id: req.params.postId }, { $inc: { heartsCount: -1 } });
 
         res.json({ message: "Heart has been removed" });
     }

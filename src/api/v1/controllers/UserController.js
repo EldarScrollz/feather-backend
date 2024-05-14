@@ -6,7 +6,7 @@ import { UserModel } from "../models/UserModel.js";
 import { PostModel } from "../models/PostModel.js";
 import { CommentModel } from "../models/CommentModel.js";
 import { HeartModel } from "../models/HeartModel.js";
-import * as jwtConfig from "../../../config/jwtConfig.js";
+import * as jwtConfig from "../../../configs/jwtConfig.js";
 
 
 
@@ -14,11 +14,11 @@ export const signUp = async (req, res) => {
     try {
         // Throw error if email exists
         const isEmailInDb = await UserModel.findOne({ email: req.body.email });
-        if (isEmailInDb) { return res.status(400).json({ errorMessage: "The email already exists" }); }
+        if (isEmailInDb) { return res.status(400).json({ errorMessage: "Email already exists" }); }
 
         // Throw error if name exists
         const isNameInDB = await UserModel.findOne({ name: req.body.name });
-        if (isNameInDB) { return res.status(400).json({ errorMessage: "The name already exists" }); }
+        if (isNameInDB) { return res.status(400).json({ errorMessage: "Name already exists" }); }
 
         // Encrypt the password
         const salt = await bcrypt.genSalt(10);
@@ -134,7 +134,7 @@ export const editUser = async (req, res) => {
         // Doesn't include changing the password
         //==================================================================
         if (!req.body.isChangePassword) {
-            const editedUser = await UserModel.findOneAndUpdate(
+            const editedUser = await UserModel.findByIdAndUpdate(
                 { _id: req.userId },
                 {
                     email: req.body.email,
@@ -165,7 +165,7 @@ export const editUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
-        const editedUser = await UserModel.findOneAndUpdate(
+        const editedUser = await UserModel.findByIdAndUpdate(
             { _id: req.userId },
             {
                 email: req.body.email,
@@ -203,7 +203,7 @@ export const deleteUser = async (req, res) => {
         const isPasswordValid = await bcrypt.compare(req.params.password, foundUser.passwordHash);
         if (!isPasswordValid) { return res.status(400).json({ errorMessage: "Incorrect password" }); }
 
-        const deletedUser = await UserModel.findOneAndDelete({ _id: req.userId });
+        const deletedUser = await UserModel.findByIdAndDelete({ _id: req.userId });
         if (!deletedUser) { return res.status(500).json({ errorMessage: "Could not delete the user" }); }
 
         const userPosts = await PostModel.find({ user: req.userId });

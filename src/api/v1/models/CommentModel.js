@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 
 
-//todo: put the same limits as in the validation.
-
-//todo CREATE LIMITS OBJECT LIKE: 'productLimits' IN 'SELLER'.
 
 const CommentSchema = new mongoose.Schema(
     {

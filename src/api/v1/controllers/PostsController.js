@@ -75,7 +75,7 @@ export const getAllPosts = async (req, res) => {
 export const getPostById = async (req, res) => {
     try {
         const postId = req.params.id;
-        const postFoundById = await PostModel.findOneAndUpdate(
+        const postFoundById = await PostModel.findByIdAndUpdate(
             { _id: postId, },
             { $inc: { viewsCount: 1 }, },
             { returnDocument: "after", },
@@ -98,7 +98,7 @@ export const deletePost = async (req, res) => {
         const postId = req.params.id;
 
         // Delete the post
-        const removedPost = await PostModel.findOneAndDelete({ _id: postId });
+        const removedPost = await PostModel.findByIdAndDelete({ _id: postId });
         if (!removedPost) { return res.status(404).json({ errorMessage: "Post not found" }); }
 
         if (removedPost.postImg !== process.env.NO_IMG) {
@@ -126,7 +126,7 @@ export const deletePost = async (req, res) => {
 
 export const updatePost = async (req, res) => {
     try {
-        const updatedPost = await PostModel.findOneAndUpdate(
+        const updatedPost = await PostModel.findByIdAndUpdate(
             { _id: req.params.id },
             {
                 title: req.body.title,
