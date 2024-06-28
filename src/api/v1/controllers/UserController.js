@@ -29,9 +29,10 @@ export const signUp = async (req, res) => {
             email: req.body.email,
             passwordHash: hashedPassword,
             name: req.body.name,
-            jwtRefreshToken: "",
             userAvatar: req.body.userAvatar,
         });
+
+        await newUser.save();
 
         // Create JWT
         const accessToken = jwt.sign({ _id: newUser._id, }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
@@ -40,11 +41,9 @@ export const signUp = async (req, res) => {
         const refreshToken = jwt.sign({ _id: newUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
         res.cookie("refreshToken", refreshToken, jwtConfig.refreshTokenCookieOptions);
 
-        newUser.jwtRefreshToken = refreshToken;
-        await newUser.save();
 
         // Copy everything except passwordHash from newUser document (no need to include passwordHash in the response)
-        const { passwordHash, jwtRefreshToken, ...userData } = newUser.toObject();
+        const { passwordHash, ...userData } = newUser.toObject();
 
         // Return the document and JWT as one object
         res.status(201).json({ ...userData, accessToken });
@@ -74,11 +73,8 @@ export const signIn = async (req, res) => {
         const refreshToken = jwt.sign({ _id: foundUser._id, }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
         res.cookie("refreshToken", refreshToken, jwtConfig.refreshTokenCookieOptions);
 
-        foundUser.jwtRefreshToken = refreshToken;
-        foundUser.save();
-
         // Copy everything except passwordHash from foundUser document (no need to include passwordHash in the response)
-        const { passwordHash, jwtRefreshToken, ...userData } = foundUser.toObject();
+        const { passwordHash, ...userData } = foundUser.toObject();
 
         // Return the document and JWT
         res.status(201).json({ ...userData });
@@ -149,9 +145,9 @@ export const editUser = async (req, res) => {
 
             deleteOldAvatar(foundUser, req.body.oldAvatar);
 
-            const { jwtRefreshToken, ...userData } = editedUser.toObject();
+            console.log(editedUser);
 
-            return res.json(userData);
+            return res.json(editedUser);
         }
         //==================================================================
         // Includes changing the password
@@ -183,9 +179,7 @@ export const editUser = async (req, res) => {
             return res.status(500).json({ errorMessage: "Could not delete user's avatar." });
         }
 
-        const { jwtRefreshToken, ...userData } = editedUser.toObject();
-
-        res.json(userData);
+        res.json(editedUser);
     }
     catch (error) {
         console.error(error);

@@ -7,7 +7,6 @@ const UserSchema = new mongoose.Schema( // Create schema -> fill it with propert
         email: { type: String, required: true, unique: true, },
         passwordHash: { type: String, required: true },
         name: { type: String, required: true, unique: true, },
-        jwtRefreshToken: { type: String, required: true },
         userAvatar: { type: String, default: process.env.NO_IMG }, // Optional
     },
     {
